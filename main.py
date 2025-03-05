@@ -124,7 +124,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Add trusted host middleware in production
 if settings.ENVIRONMENT == "production":
     app.add_middleware(
-        TrustedHostMiddleware, allowed_hosts=["api.yourdomain.com", "yourdomain.com"]
+        TrustedHostMiddleware, allowed_hosts=["api.yourdomain.com", "yourdomain.com", "localhost", "127.0.0.1"]
     )
 
 # Process time and security headers middleware
@@ -143,14 +143,15 @@ async def add_process_time_header(request, call_next):
     
     # Only use relaxed CSP in development mode for Swagger UI to work
     if settings.ENVIRONMENT == "development":
-        # Allow resources needed for Swagger UI
+        # Allow resources needed for Swagger UI and ReDoc
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net blob:; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
             "img-src 'self' https://fastapi.tiangolo.com data:; "
             "connect-src 'self'; "
-            "font-src 'self' https://cdn.jsdelivr.net; "
+            "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
+            "worker-src blob:; "
             "frame-ancestors 'none';"
         )
     else:

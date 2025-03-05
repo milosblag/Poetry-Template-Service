@@ -1,6 +1,3 @@
-version: '3.8'
-
-# Define networks for better isolation
 networks:
   api-network:
     driver: bridge
@@ -14,16 +11,6 @@ networks:
 volumes:
   app-logs:
     driver: local
-
-# Define secrets
-secrets:
-  api_key:
-    file: ./secrets/api_key.txt
-    # In production, use external secrets:
-    # external: true
-  db_password:
-    file: ./secrets/db_password.txt
-    # external: true
 
 services:
   api:
@@ -44,7 +31,7 @@ services:
     env_file:
       - .env
     environment:
-      - ENVIRONMENT=production
+      - ENVIRONMENT=development
       - HOST=0.0.0.0
       - PORT=8000
       - WORKERS_PER_CORE=1
@@ -52,6 +39,7 @@ services:
       - LOG_LEVEL=info
       - ALLOWED_ORIGINS=https://yourdomain.com
       - RATE_LIMIT_GENERAL=100/minute
+      - LOG_FILE=/app/logs/app.log
     restart: unless-stopped  # Better than 'always' as it won't restart if stopped manually
     logging:
       driver: "json-file"
@@ -71,14 +59,9 @@ services:
       - app-logs:/app/logs:rw
       # Use volume for healthcheck script if it might change frequently
       - ./healthcheck.sh:/app/healthcheck.sh:ro
-    # Mount secrets
-    secrets:
-      - api_key
-      - db_password
     # Add security options
     security_opt:
       - no-new-privileges:true
-      - seccomp=default
     # Set sysctls for container networking performance
     sysctls:
       net.core.somaxconn: 1024
@@ -97,7 +80,7 @@ services:
         constraints:
           - node.role==worker
     # Run container with read-only filesystem where possible
-    read_only: true
+    read_only: false
     # Add tmpfs for writable temporary directories
     tmpfs:
       - /tmp:rw,noexec,nosuid
