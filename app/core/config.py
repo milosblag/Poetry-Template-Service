@@ -1,5 +1,5 @@
 import os
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, ConfigDict
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 from functools import lru_cache
@@ -32,9 +32,11 @@ class Settings(BaseSettings):
     # Application version
     VERSION: str = Field("1.0.0")
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    # Configuration using ConfigDict instead of class Config
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=True
+    )
         
     @property
     def allowed_origins_list(self) -> List[str]:

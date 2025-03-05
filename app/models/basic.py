@@ -6,4 +6,7 @@ from pydantic import BaseModel, Field
 
 class Message(BaseModel):
     """Response model for the root endpoint."""
-    message: str = Field(..., example="Hello world!") 
+    message: str = Field(
+        ...,
+        json_schema_extra={"example": "Hello world!"}
+    ) 

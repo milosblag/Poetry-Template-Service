@@ -17,6 +17,7 @@ slowapi = "^0.1.9"
 psutil = "^5.9.8"
 gunicorn = "^22.0.0"
 pydantic-settings = "^2.8.1"
+pytest-asyncio = "^0.25.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
@@ -50,3 +51,8 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
