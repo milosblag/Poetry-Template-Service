@@ -27,6 +27,7 @@ isort = "^5.13.2"
 flake8 = "^7.0.0"
 mypy = "^1.8.0"
 httpx = "^0.27.0"
+types-psutil = "^7.0.0.20250218"
 
 [build-system]
 requires = ["poetry-core"]

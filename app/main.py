@@ -1,24 +1,32 @@
 """
 Main FastAPI application module.
 """
-import time
+
 import socket
-import uvicorn
+import time
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from typing import AsyncGenerator
+
+import uvicorn
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+
+from app.api.middleware.security import add_process_time_header
+from app.api.router import api_router
 
 # Local imports
 from app.core.config import get_settings
+from app.utils.exceptions import (
+    UnicornException,
+    generic_exception_handler,
+    unicorn_exception_handler,
+)
 from app.utils.logging import configure_logging
-from app.utils.exceptions import UnicornException, unicorn_exception_handler, generic_exception_handler
-from app.api.middleware.security import add_process_time_header
-from app.api.router import api_router
 
 # Configure logging
 logger = configure_logging()
@@ -46,9 +54,11 @@ def find_available_port(start_port: int, max_attempts: int = 10) -> int:
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifecycle manager for the FastAPI application."""
-    logger.info(f"Application starting up in {settings.ENVIRONMENT} environment...")
+    logger.info(
+        f"Application starting up in {settings.ENVIRONMENT} environment..."
+    )
     # Here you would initialize resources like database connections
     try:
         # Example: initialize resources
@@ -66,22 +76,41 @@ app = FastAPI(
     title="Hello World API",
     description="A simple API that returns Hello World",
     version=settings.VERSION,
-    docs_url="/docs" if settings.ENVIRONMENT != "production" else None,  # Disable in production
-    redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,  # Disable in production
+    docs_url=(
+        "/docs" if settings.ENVIRONMENT != "production" else None
+    ),  # Disable in production
+    redoc_url=(
+        "/redoc" if settings.ENVIRONMENT != "production" else None
+    ),  # Disable in production
     lifespan=lifespan,
     openapi_tags=[
-        {"name": "root", "description": "Operations related to the root endpoint."},
-        {"name": "health", "description": "Health check endpoints."}
-    ]
+        {
+            "name": "root",
+            "description": "Operations related to the root endpoint."
+        },
+        {
+            "name": "health",
+            "description": "Health check endpoints."
+        },
+    ],
 )
 
 # Add rate limiting exception handler
 app.state.limiter = limiter
+# type: ignore
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add custom exception handlers
-app.add_exception_handler(UnicornException, unicorn_exception_handler)
-app.add_exception_handler(Exception, generic_exception_handler)
+# type: ignore
+app.add_exception_handler(
+    UnicornException,
+    unicorn_exception_handler
+)
+# type: ignore
+app.add_exception_handler(
+    Exception,
+    generic_exception_handler
+)
 
 # Add middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -89,7 +118,13 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 # Add trusted host middleware in production
 if settings.ENVIRONMENT == "production":
     app.add_middleware(
-        TrustedHostMiddleware, allowed_hosts=["api.yourdomain.com", "yourdomain.com", "localhost", "127.0.0.1"]
+        TrustedHostMiddleware,
+        allowed_hosts=[
+            "api.yourdomain.com",
+            "yourdomain.com",
+            "localhost",
+            "127.0.0.1",
+        ],
     )
 
 # Add security headers middleware
@@ -108,7 +143,7 @@ app.add_middleware(
 app.include_router(api_router)
 
 
-def start():
+def start() -> None:
     """Start the application server."""
     port = find_available_port(settings.PORT)
     uvicorn.run(
@@ -117,9 +152,9 @@ def start():
         port=port,
         reload=settings.RELOAD,
         workers=settings.WORKERS,
-        log_level=settings.LOG_LEVEL.lower()
+        log_level=settings.LOG_LEVEL.lower(),
     )
 
 
 if __name__ == "__main__":
-    start() 
+    start()

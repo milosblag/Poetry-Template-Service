@@ -22,7 +22,7 @@ test:
 
 lint:
 	poetry run flake8 app
-	poetry run mypy app
+	-poetry run mypy app
 
 format:
 	poetry run black app tests

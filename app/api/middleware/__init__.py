@@ -1,3 +1,3 @@
 """
-Middleware components for the API.
-""" 
+Middleware components.
+"""

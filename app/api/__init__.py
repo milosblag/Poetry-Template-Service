@@ -1,3 +1,3 @@
 """
-API package with routes and endpoints.
-""" 
+API module for the application.
+"""

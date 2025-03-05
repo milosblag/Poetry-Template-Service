@@ -1,12 +1,16 @@
 """
 Root API endpoints.
 """
+
 import logging
-from fastapi import APIRouter, Request, HTTPException, status
-from app.models.basic import Message
-from app.core.config import get_settings
+from typing import cast
+
+from fastapi import APIRouter, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
+from app.core.config import get_settings
+from app.models.basic import Message
 
 # Get settings
 settings = get_settings()
@@ -25,17 +29,18 @@ API_PREFIX = f"/api/{settings.API_VERSION}"
 
 
 @router.get(
-    f"{API_PREFIX}/", 
-    response_model=Message, 
+    f"{API_PREFIX}/",
+    response_model=Message,
     status_code=status.HTTP_200_OK
 )
 @limiter.limit(settings.RATE_LIMIT_GENERAL)
-async def read_root(request: Request):
+async def read_root(request: Request) -> dict[str, str]:
     """
     Root endpoint that returns a Hello World message.
 
     Returns:
-        Message: Pydantic model. A dictionary containing the message
+        Message: Pydantic model. A dictionary containing
+        the message
     """
     try:
         logger.info("Processing request to root endpoint")
@@ -43,18 +48,19 @@ async def read_root(request: Request):
     except Exception as e:
         logger.error(f"Error processing request: {str(e)}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail="Internal server error"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
         )
 
 
 # Keep original route for backward compatibility
 @router.get(
-    "/", 
-    response_model=Message, 
+    "/",
+    response_model=Message,
     status_code=status.HTTP_200_OK
 )
 @limiter.limit(settings.RATE_LIMIT_GENERAL)
-async def read_root_legacy(request: Request):
+async def read_root_legacy(request: Request) -> dict[str, str]:
     """Legacy root endpoint for backward compatibility."""
-    return await read_root(request) 
+    result = await read_root(request)
+    return cast(dict[str, str], result)

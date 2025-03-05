@@ -1,3 +1,3 @@
 """
-Pydantic models for the application.
-""" 
+Data models for the application.
+"""
