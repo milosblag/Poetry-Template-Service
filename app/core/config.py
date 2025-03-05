@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 from typing import List, Optional
 from functools import lru_cache
 
+
 class Settings(BaseSettings):
     """Application settings with validation."""
     # Server settings
@@ -28,6 +29,9 @@ class Settings(BaseSettings):
     # Rate limiting
     RATE_LIMIT_GENERAL: str = Field("100/minute")
     
+    # Application version
+    VERSION: str = Field("1.0.0")
+
     class Config:
         env_file = ".env"
         case_sensitive = True
@@ -47,6 +51,7 @@ class Settings(BaseSettings):
     def uppercase_log_level(cls, v):
         """Ensure LOG_LEVEL is uppercase."""
         return v.upper()
+
 
 @lru_cache()
 def get_settings() -> Settings:

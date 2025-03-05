@@ -48,78 +48,59 @@ RUN poetry export -f requirements.txt > requirements.txt && \
     # Install from the requirements file directly
     pip install --no-cache-dir -r requirements.txt && \
     # Force upgrade setuptools to fix CVE-2024-6345
-    pip install --no-cache-dir --upgrade setuptools>=70.0.0 && \
-    # Verify installations are correct versions
-    pip list | grep gunicorn && pip list | grep python-multipart && pip list | grep setuptools
+    pip install --no-cache-dir --upgrade setuptools>=70.0.0
 
-# Runtime stage - using distroless for extra security
+# Runtime stage
 FROM ${RUNTIME_BASE} AS runtime
 
-# Security note: Using Alpine Linux eliminates vulnerabilities found in Debian-based images
-# Alpine provides:
-# - Minimal base system with a smaller attack surface
-# - musl libc instead of glibc (avoids certain classes of vulnerabilities)
-# - No vulnerable packages found in Debian (perl-base, zlib1g)
-# - Significantly smaller image size (~70% smaller)
-
-# Set working directory
+# Set working directory for the runtime stage
 WORKDIR /app
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    ENVIRONMENT=production \
     PYTHONPATH=/app
 
-# Minimal runtime packages
+# Install runtime dependencies
 RUN apk update && \
-    apk upgrade --no-cache && \
-    # Cleanup to reduce image size
-    rm -rf /var/cache/apk/* && \
-    # Create a non-root user
-    addgroup -g 1001 -S appuser && \
-    adduser -u 1001 -S appuser -G appuser -h /home/appuser && \
-    mkdir -p /home/appuser && \
-    chown -R appuser:appuser /home/appuser
+    apk upgrade && \
+    apk add --no-cache \
+    # Add runtime dependencies only
+    libffi \
+    openssl \
+    # Add curl for healthchecks
+    curl && \
+    # Create a non-root user to run the application
+    addgroup -S appgroup && \
+    adduser -S appuser -G appgroup && \
+    # Create log directory with appropriate permissions
+    mkdir -p /app/logs && \
+    chown -R appuser:appgroup /app
 
-# Copy installed packages from builder stage
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-
-# Copy healthcheck script
-COPY --chown=appuser:appuser healthcheck.sh /app/healthcheck.sh
-RUN chmod +x /app/healthcheck.sh
+# Copy the installed packages from the builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Copy application code
-COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appgroup ./app /app/app
+COPY --chown=appuser:appgroup ./run.py /app/run.py
+COPY --chown=appuser:appgroup ./gunicorn_conf.py /app/gunicorn_conf.py
+COPY --chown=appuser:appgroup ./healthcheck.sh /app/healthcheck.sh
 
-# Create log directory with proper permissions
-RUN mkdir -p /app/logs && \
-    chown -R appuser:appuser /app && \
-    chmod -R 755 /app && \
-    find /app -type f -name "*.py" -exec chmod 644 {} \; && \
-    find /app -type f -name "*.toml" -exec chmod 644 {} \; && \
-    find /app -type f -name "*.yml" -exec chmod 644 {} \; && \
-    find /app -type f -name "*.json" -exec chmod 644 {} \; && \
-    # Remove any .venv directory if exists to avoid package version conflicts
-    rm -rf /app/.venv
+# Make the healthcheck script executable
+RUN chmod +x /app/healthcheck.sh
 
-# Double check our package installations are correct and up-to-date
-RUN pip list | grep gunicorn && pip list | grep python-multipart && pip list | grep setuptools && \
-    # Force upgrade setuptools to fix CVE-2024-6345
-    pip install --no-cache-dir --upgrade setuptools>=70.0.0 && \
-    # Verify we have secure versions
-    python -c "import pkg_resources; print('Gunicorn version:', pkg_resources.get_distribution('gunicorn').version); print('Python-multipart version:', pkg_resources.get_distribution('python-multipart').version); print('Setuptools version:', pkg_resources.get_distribution('setuptools').version)"
-
-# Expose port
-EXPOSE 8000
-
-# Change to non-root user
+# Switch to non-root user
 USER appuser
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD ./healthcheck.sh || exit 1
+# Expose the application port
+EXPOSE 8000
+
+# Set up a health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD /app/healthcheck.sh
+
+# Run the application with Gunicorn
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "/app/gunicorn_conf.py", "app.main:app"]
 
 # Add metadata labels following OCI Image Spec
 LABEL org.opencontainers.image.title="Hello World API" \
@@ -132,8 +113,5 @@ LABEL org.opencontainers.image.title="Hello World API" \
       org.opencontainers.image.licenses="MIT" \
       com.example.api.security-scanned="true" \
       com.example.api.build-date="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-      com.example.api.security-notes="Switched to Alpine Linux to address perl-base (CVE-2023-31484) and zlib1g (CVE-2023-45853) vulnerabilities. Alpine uses musl libc and BusyBox instead of glibc and perl."
-
-# Run with gunicorn
-ENTRYPOINT ["gunicorn"]
-CMD ["-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn_conf.py", "main:app"] 
+      com.example.api.security-notes="Switched to Alpine Linux to address perl-base (CVE-2023-31484) and zlib1g (CVE-2023-45853) vulnerabilities. Alpine uses musl libc and BusyBox instead of glibc and perl." \
+      base_image="python:${PYTHON_VERSION}-alpine3.19" 

@@ -34,12 +34,13 @@ services:
       - ENVIRONMENT=development
       - HOST=0.0.0.0
       - PORT=8000
-      - WORKERS_PER_CORE=1
-      - WEB_CONCURRENCY=4
-      - LOG_LEVEL=info
-      - ALLOWED_ORIGINS=https://yourdomain.com
+      - WORKERS=4
+      - LOG_LEVEL=INFO
+      - ALLOWED_ORIGINS=*
       - RATE_LIMIT_GENERAL=100/minute
       - LOG_FILE=/app/logs/app.log
+    volumes:
+      - app-logs:/app/logs:rw
     restart: unless-stopped  # Better than 'always' as it won't restart if stopped manually
     logging:
       driver: "json-file"
@@ -47,49 +48,28 @@ services:
         max-size: "10m"
         max-file: "5"
         compress: "true"
-        # Add labels to logs for better filtering
-        labels: "app,api,hello-world"
     healthcheck:
-      test: ["CMD", "./healthcheck.sh"]
+      test: ["CMD", "/app/healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5s
-    volumes:
-      - app-logs:/app/logs:rw
-      # Use volume for healthcheck script if it might change frequently
-      - ./healthcheck.sh:/app/healthcheck.sh:ro
-    # Add security options
-    security_opt:
-      - no-new-privileges:true
-    # Set sysctls for container networking performance
-    sysctls:
-      net.core.somaxconn: 1024
-      net.ipv4.tcp_max_syn_backlog: 512
-    # Resource limits
+    # Set resource limits to prevent container from consuming too many resources
     deploy:
       resources:
         limits:
-          cpus: '1.0'
+          cpus: '1'
           memory: 512M
         reservations:
           cpus: '0.25'
-          memory: 256M
-      # Add placement constraints for swarm mode
-      placement:
-        constraints:
-          - node.role==worker
-    # Run container with read-only filesystem where possible
-    read_only: false
-    # Add tmpfs for writable temporary directories
+          memory: 128M
+    # Security options
+    security_opt:
+      - no-new-privileges:true  # Prevent privilege escalation
+    # Read-only root filesystem for added security
+    # Note: We need to mount specific directories as writable
+    read_only: true
     tmpfs:
-      - /tmp:rw,noexec,nosuid
-    user: "1001:1001"  # Run as non-root user (appuser)
-    # Assign container to custom network
+      - /tmp:exec,mode=1777
     networks:
       - api-network
-    # Set ulimits for the container
-    ulimits:
-      nofile:
-        soft: 1024
-        hard: 2048
