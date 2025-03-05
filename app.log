@@ -66,3 +66,77 @@
 2025-03-05 21:53:35,535 - main - INFO - Application starting up...
 2025-03-05 21:53:35,697 - watchfiles.main - INFO - 4 changes detected
 2025-03-05 21:53:41,095 - main - INFO - Application shutting down...
+2025-03-05 21:58:39,250 - __main__ - INFO - Using port: 8000
+2025-03-05 21:58:39,425 - main - INFO - Application starting up...
+2025-03-05 21:58:46,803 - main - INFO - Processing request to root endpoint
+2025-03-05 21:59:00,240 - main - INFO - Application shutting down...
+2025-03-05 22:01:14,818 - root - INFO - [3033] - Using port: 8000
+2025-03-05 22:01:15,005 - root - INFO - [3062] - Application starting up in development environment...
+2025-03-05 22:01:18,732 - root - INFO - [3062] - Processing request to root endpoint
+2025-03-05 22:01:18,802 - watchfiles.main - INFO - [3033] - 7 changes detected
+2025-03-05 22:04:28,499 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:28,601 - root - INFO - [3062] - Application shutting down...
+2025-03-05 22:04:28,800 - root - INFO - [3197] - Application starting up in development environment...
+2025-03-05 22:04:28,968 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:29,914 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:30,115 - root - INFO - [3197] - Application shutting down...
+2025-03-05 22:04:30,318 - root - INFO - [3206] - Application starting up in development environment...
+2025-03-05 22:04:30,479 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:43,675 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:43,856 - root - INFO - [3206] - Application shutting down...
+2025-03-05 22:04:44,085 - root - INFO - [3216] - Application starting up in development environment...
+2025-03-05 22:04:44,225 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:45,080 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:04:45,198 - root - INFO - [3216] - Application shutting down...
+2025-03-05 22:04:45,401 - root - INFO - [3225] - Application starting up in development environment...
+2025-03-05 22:04:45,561 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:05:30,696 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:05:30,899 - root - INFO - [3225] - Application shutting down...
+2025-03-05 22:05:31,268 - watchfiles.main - INFO - [3033] - 7 changes detected
+2025-03-05 22:06:11,702 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:21,724 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:29,542 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:31,364 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:42,395 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:44,161 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:52,453 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:06:53,860 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:07:10,677 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:07:31,751 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:07:45,738 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:07:51,529 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:07:52,162 - watchfiles.main - INFO - [3033] - 55 changes detected
+2025-03-05 22:07:52,529 - watchfiles.main - INFO - [3033] - 149 changes detected
+2025-03-05 22:07:52,895 - watchfiles.main - INFO - [3033] - 42 changes detected
+2025-03-05 22:07:53,257 - watchfiles.main - INFO - [3033] - 107 changes detected
+2025-03-05 22:08:03,681 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:08:04,042 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:08:10,377 - watchfiles.main - INFO - [3033] - 16 changes detected
+2025-03-05 22:08:21,299 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:08:21,658 - watchfiles.main - INFO - [3033] - 28 changes detected
+2025-03-05 22:08:46,836 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:08:47,203 - watchfiles.main - INFO - [3033] - 3 changes detected
+2025-03-05 22:09:03,378 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:09:03,743 - watchfiles.main - INFO - [3033] - 3 changes detected
+2025-03-05 22:09:11,354 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:09:30,186 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:09:30,554 - watchfiles.main - INFO - [3033] - 4 changes detected
+2025-03-05 22:09:45,842 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:09:46,051 - root - INFO - [4201] - Application starting up in development environment...
+2025-03-05 22:09:46,206 - watchfiles.main - INFO - [3033] - 6 changes detected
+2025-03-05 22:09:51,622 - root - INFO - [4209] - Port 8000 is in use, using port 8001 instead
+2025-03-05 22:09:51,819 - root - INFO - [4238] - Application starting up in development environment...
+2025-03-05 22:09:51,852 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:10:12,028 - root - INFO - [4238] - Application shutting down...
+2025-03-05 22:10:12,148 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:10:17,881 - watchfiles.main - INFO - [3033] - 1 change detected
+2025-03-05 22:10:18,082 - root - INFO - [4201] - Application shutting down...
+2025-03-05 22:11:09,417 - root - INFO - [4358] - Using port: 8000
+2025-03-05 22:11:09,616 - root - INFO - [4387] - Application starting up in development environment...
+2025-03-05 22:11:29,903 - root - INFO - [4387] - Processing request to root endpoint
+2025-03-05 22:11:47,024 - watchfiles.main - INFO - [4358] - 2 changes detected
+2025-03-05 22:11:47,205 - root - INFO - [4387] - Application shutting down...
+2025-03-05 22:11:47,419 - root - INFO - [4446] - Application starting up in development environment...
+2025-03-05 22:11:47,575 - watchfiles.main - INFO - [4358] - 4 changes detected
+2025-03-05 22:12:38,816 - watchfiles.main - INFO - [4358] - 16 changes detected
+2025-03-05 22:13:02,775 - root - INFO - [4446] - Application shutting down...
