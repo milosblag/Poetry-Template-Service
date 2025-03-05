@@ -140,7 +140,23 @@ async def add_process_time_header(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+    
+    # Only use relaxed CSP in development mode for Swagger UI to work
+    if settings.ENVIRONMENT == "development":
+        # Allow resources needed for Swagger UI
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "img-src 'self' https://fastapi.tiangolo.com data:; "
+            "connect-src 'self'; "
+            "font-src 'self' https://cdn.jsdelivr.net; "
+            "frame-ancestors 'none';"
+        )
+    else:
+        # Strict CSP for production
+        response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+    
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     

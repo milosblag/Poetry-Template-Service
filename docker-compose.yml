@@ -1,10 +1,46 @@
 version: '3.8'
 
+# Define networks for better isolation
+networks:
+  api-network:
+    driver: bridge
+    internal: false  # Set to true if your service doesn't need internet access
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+  
+# Define volumes for persistent data
+volumes:
+  app-logs:
+    driver: local
+
+# Define secrets
+secrets:
+  api_key:
+    file: ./secrets/api_key.txt
+    # In production, use external secrets:
+    # external: true
+  db_password:
+    file: ./secrets/db_password.txt
+    # external: true
+
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.11"
+    image: hello-world-api:${IMAGE_TAG:-latest}
+    container_name: hello-world-api
+    # Set init: true to use an init process that properly handles signals
+    init: true
+    # Use stop_grace_period to ensure clean shutdown
+    stop_grace_period: 30s
     ports:
-      - "8000:8000"
+      # Bind only to localhost in non-production environments
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
     environment:
@@ -16,17 +52,61 @@ services:
       - LOG_LEVEL=info
       - ALLOWED_ORIGINS=https://yourdomain.com
       - RATE_LIMIT_GENERAL=100/minute
-    restart: always
+    restart: unless-stopped  # Better than 'always' as it won't restart if stopped manually
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "5"
+        compress: "true"
+        # Add labels to logs for better filtering
+        labels: "app,api,hello-world"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "./healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5s
     volumes:
-      - ./app.log:/app/app.log 
+      - app-logs:/app/logs:rw
+      # Use volume for healthcheck script if it might change frequently
+      - ./healthcheck.sh:/app/healthcheck.sh:ro
+    # Mount secrets
+    secrets:
+      - api_key
+      - db_password
+    # Add security options
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=default
+    # Set sysctls for container networking performance
+    sysctls:
+      net.core.somaxconn: 1024
+      net.ipv4.tcp_max_syn_backlog: 512
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      # Add placement constraints for swarm mode
+      placement:
+        constraints:
+          - node.role==worker
+    # Run container with read-only filesystem where possible
+    read_only: true
+    # Add tmpfs for writable temporary directories
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    user: "1001:1001"  # Run as non-root user (appuser)
+    # Assign container to custom network
+    networks:
+      - api-network
+    # Set ulimits for the container
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 2048
