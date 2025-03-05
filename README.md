@@ -1,171 +1,251 @@
-# Hello World API
+# Hello World API with Docker Security Scanner
 
-A production-ready FastAPI Hello World API with proper configuration and best practices.
+A production-ready FastAPI Hello World API with integrated security scanning for Docker images.
+
+## Project Overview
+
+This project consists of:
+
+1. A production-ready FastAPI application with health checks, rate limiting, and proper logging
+2. A secure Dockerfile with multi-stage builds and security best practices
+3. A Docker Compose configuration for easy local deployment
+4. A powerful security scanning script (`scan-image.sh`) to find vulnerabilities in Docker images
 
 ## Features
 
-- ✅ API versioning with backward compatibility
-- ✅ Comprehensive health checks with system metrics (CPU, memory, disk)
-- ✅ Rate limiting to prevent abuse
-- ✅ Enhanced security headers with CSP and permissions policies
-- ✅ Proper configuration management with environment variables
-- ✅ Production-ready logging with rotation
-- ✅ Graceful error handling and detailed debugging (dev only)
-- ✅ Docker and Docker Compose support
-- ✅ Gunicorn for production deployment
-- ✅ Response compression for better performance
-- ✅ Structured error reporting with error IDs
+### FastAPI Application
 
-## Project Structure
+- **FastAPI Framework**: Modern, high-performance web framework based on Python type hints
+- **Health Check Endpoint**: Built-in monitoring endpoint with comprehensive service health information
+- **Rate Limiting**: Protection against abuse with configurable rate limits
+- **Proper Logging**: Structured logging with rotation support
+- **CORS Configuration**: Configurable Cross-Origin Resource Sharing
+- **Error Handling**: Comprehensive exception handling with proper error responses
 
-```
-.
-├── config.py            # Configuration management
-├── Dockerfile           # Container definition
-├── docker-compose.yml   # Container orchestration
-├── gunicorn_conf.py     # Production server config
-├── health.py            # Enhanced health checks
-├── main.py              # Application entry point
-├── poetry.lock          # Dependency lock file
-├── pyproject.toml       # Poetry package definition
-└── README.md            # This file
-```
+### Docker Setup
 
-## Installation
+- **Multi-Stage Build**: Optimized Docker image size and improved security
+- **Security Hardening**: Non-root user, read-only filesystem where possible, removed unnecessary binaries
+- **Resource Limiting**: CPU and memory constraints to prevent resource exhaustion
+- **Health Checking**: Containerized health checking with retries and proper reporting
 
-### Prerequisites
+### Security Scanner
 
-- Python 3.11+
-- Poetry for dependency management
+- **Automated Vulnerability Scanning**: Using Trivy to detect security issues
+- **Configurable Severity Levels**: Focus on specific vulnerability severities (LOW, MEDIUM, HIGH, CRITICAL)
+- **CI/CD Integration**: Flexible exit code handling for pipeline integration
+- **macOS Support**: Special handling for Docker Desktop on macOS
 
-```bash
-# Install poetry if you haven't already
-curl -sSL https://install.python-poetry.org | python3 -
+## Prerequisites
 
-# Install dependencies
-poetry install
-```
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/) (included with Docker Desktop)
+- [Trivy](https://aquasecurity.github.io/trivy/latest/getting-started/installation/) (for security scanning)
+- Bash shell
 
-## Running the Application
+## Getting Started
 
-### For Development:
+### Building the API
+
+Build the Docker image using Docker Compose:
 
 ```bash
-# Run with auto-reload
-poetry run python main.py
+docker-compose build
 ```
 
-### For Production:
+Or build directly with Docker:
 
 ```bash
-# Using Poetry and Gunicorn
-poetry run gunicorn -k uvicorn.workers.UvicornWorker -c gunicorn_conf.py main:app
+docker build -t hello-world-api:latest .
+```
 
-# Using Docker
+### Running the API
+
+Start the API with Docker Compose:
+
+```bash
 docker-compose up -d
 ```
 
-## Environment Variables
+Check if the API is running:
 
-Create a `.env` file with the following variables:
-
-```
-# Server settings
-HOST=0.0.0.0           # Host to bind to
-PORT=8000              # Port to bind to
-RELOAD=False           # Auto-reload on code changes (development only)
-WORKERS=4              # Number of worker processes
-
-# Environment settings
-ENVIRONMENT=production        # 'development' or 'production'
-LOG_LEVEL=info               # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-LOG_FILE=app.log             # Log file path
-LOG_MAX_SIZE=10485760        # Max log file size in bytes (10MB)
-LOG_BACKUP_COUNT=5           # Number of log files to keep
-
-# CORS settings
-ALLOWED_ORIGINS=https://yourdomain.com  # Comma-separated list of allowed origins
-
-# API settings
-API_VERSION=v1               # API version prefix
-
-# Rate limiting
-RATE_LIMIT_GENERAL=100/minute # Rate limit for general endpoints
+```bash
+curl http://localhost:8000/health
 ```
 
-## API Documentation
-
-In development mode, you can access:
-- API documentation at: http://localhost:8000/docs
-- Alternative documentation at: http://localhost:8000/redoc
-
-In production mode, these endpoints are disabled for security.
-
-## API Endpoints
-
-- Hello World: 
-  - New: http://localhost:8000/api/v1/
-  - Legacy: http://localhost:8000/
-  
-- Health Check: 
-  - New: http://localhost:8000/api/v1/health
-  - Legacy: http://localhost:8000/health
-
-## Health Check Response
-
-The health check endpoint returns detailed information about the service:
-
+Expected output:
 ```json
 {
   "status": "ok",
   "version": "1.0.0",
-  "uptime_seconds": 3600,
-  "uptime_human": "1h",
-  "system": {
-    "process_id": 1234,
-    "hostname": "server1",
-    "cpu_usage": 12.5,
-    "memory_usage": 35.2,
-    "disk_usage": 42.7
-  }
+  "timestamp": "2023-08-15T12:30:45Z"
 }
 ```
 
-## Docker Deployment
+### Accessing the API
 
-The application includes Docker support for easy deployment:
+The main endpoint is available at:
 
-```bash
-# Build and start the container
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop the container
-docker-compose down
+```
+http://localhost:8000/
 ```
 
-## Security Features
+The health check endpoint is available at:
 
-- **Rate Limiting**: Prevents abuse by limiting request frequency
-- **Security Headers**:
-  - Content-Security-Policy: Prevents XSS and data injection attacks
-  - X-Content-Type-Options: Prevents MIME type sniffing
-  - X-Frame-Options: Prevents clickjacking
-  - X-XSS-Protection: Additional XSS protection
-  - Referrer-Policy: Controls referrer information
-  - Permissions-Policy: Controls browser features
-  - Strict-Transport-Security: Enforces HTTPS (production only)
-- **Trusted Hosts**: Prevents host header attacks in production
-- **Response Compression**: Improves performance and reduces bandwidth
+```
+http://localhost:8000/health
+```
 
-## Error Handling
+## Security Scanning
 
-The application includes comprehensive error handling:
+The project includes a powerful security scanning script for Docker images.
 
-- Custom exception types with dedicated handlers
-- Automatic error ID generation for traceability
-- Detailed error information in development mode
-- Production-safe error responses without sensitive details
-- Error logging with full tracebacks for debugging 
+### Running the Security Scanner
+
+Make the script executable:
+
+```bash
+chmod +x scan-image.sh
+```
+
+Scan the default API image:
+
+```bash
+./scan-image.sh
+```
+
+### Security Scanner Options
+
+- `--image=NAME`: Docker image name to scan (default: hello-world-api:latest)
+- `--severity=LEVEL`: Severity levels to scan for (default: HIGH,CRITICAL)
+- `--exit-on=LEVEL`: Exit with error if vulnerabilities at this level are found (default: CRITICAL)
+- `--timeout=TIME`: Timeout for scan (default: 10m)
+- `--help`: Display help message
+
+### Security Scanner Examples
+
+Scan the default image:
+```bash
+./scan-image.sh
+```
+
+Scan a specific image:
+```bash
+./scan-image.sh --image=myapp:1.0
+```
+
+Scan for all vulnerability levels:
+```bash
+./scan-image.sh --severity=LOW,MEDIUM,HIGH,CRITICAL
+```
+
+Report vulnerabilities but don't fail the pipeline:
+```bash
+./scan-image.sh --exit-on=NONE
+```
+
+### Security Scanner Exit Codes
+
+- `0`: No vulnerabilities found or vulnerabilities below exit-on level
+- `1`: Vulnerabilities found at or above exit-on level
+- `2`: Docker daemon connection error
+- `3`: Image not found or scanning error
+
+## CI/CD Integration
+
+The security scanner can be integrated into CI/CD pipelines to enforce security requirements:
+
+```yaml
+# Example GitHub Actions job
+security-scan:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      run: docker build -t hello-world-api:latest .
+      
+    - name: Install Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+        
+    - name: Run security scan
+      run: ./scan-image.sh --image=hello-world-api:latest
+```
+
+## Development
+
+### Local Python Setup
+
+If you want to run the API locally without Docker:
+
+1. Install Poetry:
+```bash
+pip install poetry
+```
+
+2. Install dependencies:
+```bash
+poetry install
+```
+
+3. Run the API:
+```bash
+poetry run uvicorn main:app --reload
+```
+
+### Configuration
+
+The application is configured through environment variables, which can be set in the `.env` file:
+
+- `ENVIRONMENT`: Set to `development`, `staging`, or `production`
+- `HOST`: Host to bind the API server to
+- `PORT`: Port to expose the API
+- `LOG_LEVEL`: Logging level (info, debug, warning, error)
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins
+- `RATE_LIMIT_GENERAL`: Rate limit for API endpoints
+
+## Troubleshooting
+
+### Docker Issues
+
+If you encounter permission issues with Docker, ensure your user has the necessary permissions to access the Docker daemon:
+
+```bash
+# Add your user to the docker group (Linux)
+sudo usermod -aG docker $USER
+```
+
+On macOS, ensure Docker Desktop is running and properly authenticated.
+
+### macOS Docker Socket
+
+The security scanner automatically detects if it's running on macOS and sets the correct Docker socket location, which is typically at `~/.docker/run/docker.sock` instead of the default `/var/run/docker.sock`.
+
+If you still encounter issues, you can manually set the Docker host:
+
+```bash
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
+```
+
+### Trivy Installation
+
+If Trivy is not installed, you can install it following the [official installation guide](https://aquasecurity.github.io/trivy/latest/getting-started/installation/).
+
+Quick installation commands:
+
+```bash
+# macOS
+brew install trivy
+
+# Debian/Ubuntu
+apt-get install wget apt-transport-https gnupg lsb-release
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+apt-get update
+apt-get install trivy
+```
+
+## License
+
+MIT 
