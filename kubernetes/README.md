@@ -50,14 +50,13 @@ kubectl get pods -l app=hello-world-api
 
 # Check service
 kubectl get svc -l app=hello-world-api
-
 ```
 
 ### 5. Access the API
 
 The API will be available at:
 - Inside the cluster: `http://hello-world-api`
-- Outside the cluster: `https://api.example.com` (replace with your domain)
+- For external access, you'll need to set up your own ingress controller or use a LoadBalancer service type
 
 ## Configuration Options
 
@@ -114,9 +113,6 @@ kubectl get events --sort-by='.lastTimestamp'
 The API exposes a health endpoint at `/api/v1/health`. You can check it using:
 
 ```bash
-# From outside the cluster
-curl https://api.example.com/api/v1/health
-
 # From inside the cluster
 kubectl run -it --rm --restart=Never curl-test --image=curlimages/curl -- curl http://hello-world-api/api/v1/health
 ``` 
