@@ -19,19 +19,3 @@ def test_basic_health_check(client):
     assert "version" not in data
     assert "uptime_seconds" not in data
     assert "system" not in data
-
-
-def test_health_check_legacy(client):
-    """Test the legacy health check endpoint returns the expected structure."""
-    response = client.get("/health")
-    assert response.status_code == status.HTTP_200_OK
-    data = response.json()
-
-    # Check required fields for basic health check
-    assert "status" in data
-    assert data["status"] == "ok"
-    
-    # Ensure detailed fields are not present
-    assert "version" not in data
-    assert "uptime_seconds" not in data
-    assert "system" not in data

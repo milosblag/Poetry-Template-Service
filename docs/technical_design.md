@@ -63,7 +63,6 @@ The Hello World API follows a layered architecture with clear separation of conc
 
 The API implements URL path-based versioning:
 - Current version is accessible at `/api/v1/...`
-- Legacy endpoints remain at the root path for backward compatibility
 - New features are added to the latest version
 - Breaking changes trigger a version increment
 

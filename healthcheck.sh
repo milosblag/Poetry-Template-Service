@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-HEALTH_ENDPOINT="http://localhost:8000/health"
+HEALTH_ENDPOINT="http://localhost:8000/api/v1/health"
 TIMEOUT=5
 MAX_RETRIES=3
 

@@ -14,7 +14,6 @@ Production: `https://api.yourdomain.com` (Replace with your actual domain)
 The API supports versioning via URL path. The current version is `v1`.
 
 - Version 1: `/api/v1/`
-- Legacy endpoints are available at the root path for backward compatibility
 
 ## Common Headers
 

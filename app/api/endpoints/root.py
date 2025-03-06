@@ -51,16 +51,3 @@ async def read_root(request: Request) -> dict[str, str]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
         )
-
-
-# Keep original route for backward compatibility
-@router.get(
-    "/",
-    response_model=Message,
-    status_code=status.HTTP_200_OK
-)
-@limiter.limit(settings.RATE_LIMIT_GENERAL)
-async def read_root_legacy(request: Request) -> dict[str, str]:
-    """Legacy root endpoint for backward compatibility."""
-    result = await read_root(request)
-    return cast(dict[str, str], result)

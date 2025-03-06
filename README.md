@@ -151,7 +151,7 @@ hello-world-api/
 ### Endpoints
 
 - `GET /api/v1/`: Returns a Hello World message
-- `GET /api/v1/health`: Returns basic health status (public)
+- `GET /api/v1/health`: Returns basic health status
 
 When running in development mode, comprehensive API documentation is available at:
 - **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)

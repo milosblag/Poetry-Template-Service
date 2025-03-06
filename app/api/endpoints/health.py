@@ -38,11 +38,3 @@ async def health_check(request: Request) -> BasicHealth:
     """
     logger.debug("Basic health check requested")
     return get_basic_health()
-
-# Keep original route for backward compatibility
-@router.get("/health", response_model=BasicHealth)
-@limiter.limit(settings.RATE_LIMIT_GENERAL)
-async def health_check_legacy(request: Request) -> BasicHealth:
-    """Legacy health check endpoint for backward compatibility."""
-    result = await health_check(request)
-    return cast(BasicHealth, result)
