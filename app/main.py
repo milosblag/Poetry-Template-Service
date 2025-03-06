@@ -5,7 +5,8 @@ Main FastAPI application module.
 import socket
 import time
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import AsyncGenerator, cast
+from typing import Callable
 
 import uvicorn
 from fastapi import FastAPI
@@ -15,6 +16,8 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.responses import Response
+from starlette.requests import Request
 
 from app.api.middleware.security import add_process_time_header
 from app.api.router import api_router
@@ -97,19 +100,31 @@ app = FastAPI(
 
 # Add rate limiting exception handler
 app.state.limiter = limiter
-# type: ignore
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Cast to the expected callable type for FastAPI exception handlers
+app.add_exception_handler(
+    RateLimitExceeded,
+    cast(
+        'Callable[[Request, Exception], Response]',
+        _rate_limit_exceeded_handler
+    )
+)
 
 # Add custom exception handlers
-# type: ignore
 app.add_exception_handler(
     UnicornException,
-    unicorn_exception_handler
+    cast(
+        'Callable[[Request, Exception], Response]',
+        unicorn_exception_handler
+    )
 )
-# type: ignore
+
 app.add_exception_handler(
     Exception,
-    generic_exception_handler
+    cast(
+        'Callable[[Request, Exception], Response]',
+        generic_exception_handler
+    )
 )
 
 # Add middleware
