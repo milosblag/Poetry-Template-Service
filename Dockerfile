@@ -123,5 +123,5 @@ LABEL org.opencontainers.image.title="Hello World API" \
       org.opencontainers.image.licenses="MIT" \
       com.example.api.security-scanned="true" \
       com.example.api.build-date="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-      com.example.api.security-notes="Switched to Alpine Linux to address perl-base (CVE-2023-31484) and zlib1g (CVE-2023-45853) vulnerabilities. Alpine uses musl libc and BusyBox instead of glibc and perl. Upgraded setuptools to 70.0.0 to fix CVE-2024-6345." \
+      com.example.api.security-notes="" \
       base_image="python:${PYTHON_VERSION}-alpine3.19" 

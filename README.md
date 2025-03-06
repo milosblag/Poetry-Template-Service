@@ -176,7 +176,6 @@ The application is highly configurable through environment variables or a `.env`
 | LOG_BACKUP_COUNT     | Number of log backups to keep            | 5             |
 | ALLOWED_ORIGINS      | CORS allowed origins (comma-separated)   | *             |
 | API_VERSION          | API version                              | v1            |
-| API_KEY              | API key for protected endpoints          | test_api_key  |
 | RATE_LIMIT_GENERAL   | General rate limit                       | 100/minute    |
 
 ## Testing

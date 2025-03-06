@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
+
+commonLabels:
+  app: hello-world-api
+  environment: production
+
+# Replace these with your actual values
+configMapGenerator:
+- name: hello-world-api-config
+  behavior: merge
+  literals:
+  - VERSION=1.0.0
+
+patchesStrategicMerge:
+  # Add any environment-specific patches here
+  []
+  # - patches/production-resources.yaml 
