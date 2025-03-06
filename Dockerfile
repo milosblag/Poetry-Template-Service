@@ -32,9 +32,12 @@ RUN apk update && \
     libffi-dev \
     openssl-dev
 
-# Install poetry and update setuptools to secure version
-RUN pip install --no-cache-dir poetry==1.7.1 && \
-    pip install --no-cache-dir --upgrade pip setuptools>=70.0.0
+# First update pip and install a safe version of setuptools to fix CVE-2024-6345
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --force-reinstall setuptools==70.0.0
+
+# Install poetry
+RUN pip install --no-cache-dir poetry==1.7.1
 
 # Copy only requirements files first to leverage Docker cache
 COPY pyproject.toml poetry.lock* ./
@@ -44,11 +47,13 @@ RUN poetry export -f requirements.txt > requirements.txt && \
     # Ensure we have the secure versions explicitly listed
     echo "gunicorn==22.0.0" >> requirements.txt && \
     echo "python-multipart==0.0.18" >> requirements.txt && \
-    echo "setuptools>=70.0.0" >> requirements.txt && \
+    echo "setuptools==70.0.0" >> requirements.txt && \
     # Install from the requirements file directly
     pip install --no-cache-dir -r requirements.txt && \
-    # Force upgrade setuptools to fix CVE-2024-6345
-    pip install --no-cache-dir --upgrade setuptools>=70.0.0
+    # Force upgrade setuptools to fix CVE-2024-6345 after all dependencies
+    pip install --no-cache-dir --force-reinstall setuptools==70.0.0 && \
+    # Verify setuptools version
+    pip show setuptools | grep "Version:"
 
 # Runtime stage
 FROM ${RUNTIME_BASE} AS runtime
@@ -61,7 +66,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
-# Install runtime dependencies
+# Install runtime dependencies and force setuptools update (fix CVE-2024-6345)
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
@@ -70,6 +75,8 @@ RUN apk update && \
     openssl \
     # Add curl for healthchecks
     curl && \
+    # Update pip and setuptools in the runtime stage too
+    pip install --no-cache-dir --force-reinstall setuptools==70.0.0 && \
     # Create a non-root user to run the application
     addgroup -S appgroup && \
     adduser -S appuser -G appgroup && \
@@ -80,6 +87,9 @@ RUN apk update && \
 # Copy the installed packages from the builder stage
 COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Final check for setuptools version in runtime stage 
+RUN pip show setuptools | grep "Version:"
 
 # Copy application code
 COPY --chown=appuser:appgroup ./app /app/app
@@ -113,5 +123,5 @@ LABEL org.opencontainers.image.title="Hello World API" \
       org.opencontainers.image.licenses="MIT" \
       com.example.api.security-scanned="true" \
       com.example.api.build-date="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-      com.example.api.security-notes="Switched to Alpine Linux to address perl-base (CVE-2023-31484) and zlib1g (CVE-2023-45853) vulnerabilities. Alpine uses musl libc and BusyBox instead of glibc and perl." \
+      com.example.api.security-notes="Switched to Alpine Linux to address perl-base (CVE-2023-31484) and zlib1g (CVE-2023-45853) vulnerabilities. Alpine uses musl libc and BusyBox instead of glibc and perl. Upgraded setuptools to 70.0.0 to fix CVE-2024-6345." \
       base_image="python:${PYTHON_VERSION}-alpine3.19" 

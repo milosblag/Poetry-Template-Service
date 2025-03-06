@@ -6,11 +6,6 @@ networks:
       driver: default
       config:
         - subnet: 172.28.0.0/16
-  
-# Define volumes for persistent data
-volumes:
-  app-logs:
-    driver: local
 
 services:
   api:
@@ -38,9 +33,6 @@ services:
       - LOG_LEVEL=INFO
       - ALLOWED_ORIGINS=*
       - RATE_LIMIT_GENERAL=100/minute
-      - LOG_FILE=/app/logs/app.log
-    volumes:
-      - app-logs:/app/logs:rw
     restart: unless-stopped  # Better than 'always' as it won't restart if stopped manually
     logging:
       driver: "json-file"

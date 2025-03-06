@@ -30,8 +30,14 @@ class SystemStats(BaseModel):
     )
 
 
+class BasicHealth(BaseModel):
+    """Model for basic health information (public endpoint)."""
+
+    status: str = Field(..., description="Service status")
+
+
 class ServiceHealth(BaseModel):
-    """Model for service health information."""
+    """Model for detailed service health information (protected endpoint)."""
 
     status: str = Field(..., description="Service status")
     version: str = Field(..., description="Service version")
@@ -92,3 +98,8 @@ def get_service_health(version: str = "1.0.0") -> ServiceHealth:
         uptime_human=format_uptime(uptime_seconds),
         system=get_system_stats(),
     )
+
+
+def get_basic_health() -> BasicHealth:
+    """Get basic health status for public endpoint."""
+    return BasicHealth(status="ok")

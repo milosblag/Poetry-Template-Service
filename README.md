@@ -32,6 +32,7 @@ A production-ready FastAPI Hello World API with an emphasis on security, perform
   - Rate limiting to prevent abuse
   - CORS configuration
   - Trusted host validation
+  - Docker image vulnerability scanning
 - **Performance Optimizations**:
   - GZip compression for responses
   - Asynchronous request handling
@@ -150,7 +151,7 @@ hello-world-api/
 ### Endpoints
 
 - `GET /api/v1/`: Returns a Hello World message
-- `GET /api/v1/health`: Returns detailed health check information
+- `GET /api/v1/health`: Returns basic health status (public)
 
 When running in development mode, comprehensive API documentation is available at:
 - **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -175,6 +176,7 @@ The application is highly configurable through environment variables or a `.env`
 | LOG_BACKUP_COUNT     | Number of log backups to keep            | 5             |
 | ALLOWED_ORIGINS      | CORS allowed origins (comma-separated)   | *             |
 | API_VERSION          | API version                              | v1            |
+| API_KEY              | API key for protected endpoints          | test_api_key  |
 | RATE_LIMIT_GENERAL   | General rate limit                       | 100/minute    |
 
 ## Testing
@@ -248,6 +250,7 @@ Benchmark results will vary by hardware, but typical performance on modest hardw
 - **Trusted Host Validation**: Prevents host header attacks
 - **Alpine Linux Base**: Minimal attack surface in Docker image
 - **Dependency Security**: Regular updates via Poetry
+- **Simple Health Endpoint**: Public endpoint with minimal information for monitoring
 
 ### Security Recommendations
 
@@ -255,6 +258,18 @@ Benchmark results will vary by hardware, but typical performance on modest hardw
 - Implement API keys or OAuth2 for protected endpoints
 - Regularly update dependencies with `poetry update`
 - Run security scans on your Docker image
+- Always use a strong, unique API key in production environments
+- Consider implementing more robust authentication for production
+
+### Docker Security
+
+This project includes tools for Docker image vulnerability scanning:
+
+- Manual vulnerability scanning: `make docker-scan` or `./scan_docker_vulnerabilities.sh`
+- CI/CD integration: `./ci_vulnerability_scan.sh`
+- Security reports are generated in various formats (JSON, HTML, text summary)
+
+For more details, see the [Docker Security Documentation](docs/docker_security.md).
 
 ## Contributing
 
@@ -286,3 +301,106 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 Made with ❤️ using FastAPI and modern Python practices 
+
+# Docker Vulnerability Scanning Tools
+
+This repository contains tools for scanning Docker images for security vulnerabilities.
+
+## Overview
+
+We've consolidated our Docker vulnerability scanning tools into a single, comprehensive scanner that provides flexibility, robust error handling, and enhanced reporting capabilities.
+
+## Key Components
+
+- **[docker_vulnerability_scanner.sh](./docker_vulnerability_scanner.sh)**: The main scanner script that provides comprehensive vulnerability scanning for Docker images
+- **[docker_connectivity_check.sh](./docker_connectivity_check.sh)**: A diagnostic tool for checking Docker connectivity issues
+
+## Usage
+
+### Basic Usage
+
+Scan a Docker image for vulnerabilities:
+
+```bash
+./docker_vulnerability_scanner.sh --image my-image:latest
+```
+
+Or use the Make command:
+
+```bash
+make docker-scan
+```
+
+### Diagnostic Tool
+
+If you encounter Docker connectivity issues:
+
+```bash
+./docker_connectivity_check.sh
+```
+
+Or use the Make command:
+
+```bash
+make docker-check
+```
+
+### Advanced Options
+
+The scanner supports many options:
+
+```bash
+# Show help with all options
+./docker_vulnerability_scanner.sh --help
+
+# Customize severity levels
+./docker_vulnerability_scanner.sh --severity "CRITICAL,HIGH,MEDIUM"
+
+# Output to JSON file
+./docker_vulnerability_scanner.sh --format json --output results.json
+
+# Generate markdown report
+./docker_vulnerability_scanner.sh --report
+
+# Skip Python package scanning
+./docker_vulnerability_scanner.sh --skip-python
+
+# Specify Docker socket location
+./docker_vulnerability_scanner.sh --socket /custom/path/to/docker.sock
+```
+
+## CI/CD Integration
+
+We provide a GitHub Actions workflow for automated vulnerability scanning:
+
+```yaml
+# .github/workflows/docker-security-scan.yml
+```
+
+## Documentation
+
+For comprehensive documentation on Docker security and vulnerability scanning, see:
+
+- [Docker Security Documentation](./docs/docker_security.md)
+
+## Cleanup
+
+The vulnerability scanner generates various report files. To clean up these files:
+
+```bash
+# Remove security reports and scan results
+rm -f security-report-*.md scan-results.json
+
+# Or use the make command
+make clean
+```
+
+These files are also included in .gitignore to prevent them from being committed to the repository.
+
+## Recent Updates
+
+- Consolidated multiple scanner scripts into a single enhanced scanner
+- Added GitHub Actions workflow for automated scanning
+- Improved Docker socket auto-detection
+- Enhanced error handling and diagnostics
+- Added comprehensive report generation 

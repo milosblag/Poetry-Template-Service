@@ -1,4 +1,4 @@
-.PHONY: help install run test lint format clean docker-build docker-run
+.PHONY: help install run test lint format clean security-clean docker-build docker-run docker-scan docker-check
 
 help:
 	@echo "Available commands:"
@@ -7,9 +7,12 @@ help:
 	@echo "  make test         - Run tests"
 	@echo "  make lint         - Run linting"
 	@echo "  make format       - Format code"
-	@echo "  make clean        - Clean up temporary files"
+	@echo "  make clean        - Clean up temporary files and security reports"
+	@echo "  make security-clean - Clean up security reports only"
 	@echo "  make docker-build - Build Docker image"
 	@echo "  make docker-run   - Run Docker container"
+	@echo "  make docker-scan  - Scan Docker image for vulnerabilities"
+	@echo "  make docker-check - Check Docker connectivity and diagnose issues"
 
 install:
 	poetry install
@@ -28,7 +31,11 @@ format:
 	poetry run black app tests
 	poetry run isort app tests
 
-clean:
+security-clean:
+	rm -f security-report-*.md security-report-*.html scan-results.json trivy-*.json trivy-*.sarif
+	rm -rf security-reports
+
+clean: security-clean
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type d -name "*.eggs" -exec rm -rf {} +
@@ -39,6 +46,7 @@ clean:
 	find . -type d -name "htmlcov" -exec rm -rf {} +
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	find . -type d -name ".coverage_html" -exec rm -rf {} +
+	find . -type d -name "coverage_html" -exec rm -rf {} +
 	rm -rf build/
 	rm -rf dist/
 	rm -rf .mypy_cache/
@@ -48,3 +56,9 @@ docker-build:
 
 docker-run:
 	docker run -p 8000:8000 hello-world-api 
+
+docker-scan:
+	./docker_vulnerability_scanner.sh
+
+docker-check:
+	./docker_connectivity_check.sh 

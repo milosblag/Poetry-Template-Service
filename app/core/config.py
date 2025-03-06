@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     # API settings
     API_VERSION: str = Field(default="v1")
+    API_KEY: str = Field(default="test_api_key")  # Replace with a secure key in production
 
     # Rate limiting
     RATE_LIMIT_GENERAL: str = Field(default="100/minute")

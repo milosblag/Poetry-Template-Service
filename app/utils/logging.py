@@ -3,7 +3,6 @@ Logging configuration utilities.
 """
 
 import logging
-from logging.handlers import RotatingFileHandler
 
 from app.core.config import get_settings
 
@@ -12,7 +11,7 @@ settings = get_settings()
 
 
 def configure_logging() -> logging.Logger:
-    """Configure application logging with rotation."""
+    """Configure application logging for container environments."""
     logger = logging.getLogger()
     logger.setLevel(settings.LOG_LEVEL)
 
@@ -20,27 +19,17 @@ def configure_logging() -> logging.Logger:
     if logger.handlers:
         logger.handlers.clear()
 
-    # Console handler
+    # Console handler for stdout/stderr
     console_handler = logging.StreamHandler()
     console_handler.setLevel(settings.LOG_LEVEL)
-
-    # File handler with rotation
-    file_handler = RotatingFileHandler(
-        settings.LOG_FILE,
-        maxBytes=settings.LOG_MAX_SIZE,
-        backupCount=settings.LOG_BACKUP_COUNT,
-    )
-    file_handler.setLevel(settings.LOG_LEVEL)
 
     # Formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - [%(process)d] - %(message)s"
     )
     console_handler.setFormatter(formatter)
-    file_handler.setFormatter(formatter)
 
-    # Add handlers
+    # Add handler
     logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
 
     return logger

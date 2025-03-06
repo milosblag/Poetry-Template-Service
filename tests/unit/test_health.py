@@ -5,22 +5,20 @@ Tests for the health endpoint.
 from fastapi import status
 
 
-def test_health_check(client):
-    """Test the health check endpoint returns the expected structure."""
+def test_basic_health_check(client):
+    """Test the basic health check endpoint returns the expected structure."""
     response = client.get("/api/v1/health")
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 
-    # Check required fields
+    # Check required fields for basic health check
     assert "status" in data
-    assert "version" in data
-    assert "uptime_seconds" in data
-    assert "uptime_human" in data
-    assert "system" in data
-
-    # Check system stats
-    assert "process_id" in data["system"]
-    assert "hostname" in data["system"]
+    assert data["status"] == "ok"
+    
+    # Ensure detailed fields are not present
+    assert "version" not in data
+    assert "uptime_seconds" not in data
+    assert "system" not in data
 
 
 def test_health_check_legacy(client):
@@ -29,9 +27,11 @@ def test_health_check_legacy(client):
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
 
-    # Check required fields
+    # Check required fields for basic health check
     assert "status" in data
-    assert "version" in data
-    assert "uptime_seconds" in data
-    assert "uptime_human" in data
-    assert "system" in data
+    assert data["status"] == "ok"
+    
+    # Ensure detailed fields are not present
+    assert "version" not in data
+    assert "uptime_seconds" not in data
+    assert "system" not in data

@@ -2,7 +2,6 @@
 Main FastAPI application module.
 """
 
-import socket
 import time
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, cast
@@ -42,18 +41,6 @@ startup_time = time.time()
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
-
-
-def find_available_port(start_port: int, max_attempts: int = 10) -> int:
-    """Find an available port starting from start_port."""
-    for port in range(start_port, start_port + max_attempts):
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.bind((settings.HOST, port))
-                return port
-        except OSError:
-            continue
-    return start_port  # Fallback to original port if nothing available
 
 
 @asynccontextmanager
@@ -160,11 +147,10 @@ app.include_router(api_router)
 
 def start() -> None:
     """Start the application server."""
-    port = find_available_port(settings.PORT)
     uvicorn.run(
         "app.main:app",
         host=settings.HOST,
-        port=port,
+        port=settings.PORT,
         reload=settings.RELOAD,
         workers=settings.WORKERS,
         log_level=settings.LOG_LEVEL.lower(),
