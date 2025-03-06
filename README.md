@@ -38,7 +38,7 @@ A production-ready FastAPI Hello World API with an emphasis on security, perform
   - Asynchronous request handling
   - Optimized Docker configuration
 - **Observability**:
-  - Structured logging with rotation
+  - Structured console logging
   - Request timing information
   - Resource usage metrics
 - **Developer Experience**:
@@ -55,17 +55,26 @@ hello-world-api/
 │   ├── api/                # API endpoints and routers
 │   │   ├── endpoints/      # API endpoint modules
 │   │   ├── middleware/     # Middleware components
-│   │   └── dependencies/   # Endpoint dependencies
+│   │   └── router.py       # Main API router
 │   ├── core/               # Core application components
-│   │   └── security/       # Security utilities
+│   │   ├── config.py       # Configuration settings
+│   │   └── health.py       # Health check functionality
 │   ├── models/             # Pydantic models
-│   ├── services/           # Business logic services
-│   ├── database/           # Database models and utilities
 │   └── utils/              # Utility functions
 ├── tests/                  # Test suite
-│   ├── unit/               # Unit tests
-│   └── integration/        # Integration tests
 ├── docs/                   # Documentation
+│   ├── api_documentation.md
+│   ├── code_examples.md
+│   ├── docker_security.md
+│   ├── installation.md
+│   ├── security.md
+│   └── technical_design.md
+├── kubernetes/             # Kubernetes deployment configuration
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── configmap.yaml
+│   ├── kustomization.yaml
+│   └── README.md           # Kubernetes-specific documentation
 ├── .env                    # Environment variables
 ├── pyproject.toml          # Poetry configuration
 ├── poetry.lock             # Poetry lock file
@@ -75,6 +84,8 @@ hello-world-api/
 ├── run.py                  # Entry point script
 ├── run_tests.py            # Test runner script
 ├── healthcheck.sh          # Container health check script
+├── docker_vulnerability_scanner.sh  # Docker security scanning tool
+├── docker_connectivity_check.sh     # Docker connectivity diagnostic tool
 └── Makefile                # Development and CI/CD command shortcuts
 ```
 
@@ -86,6 +97,7 @@ hello-world-api/
 - **Uvicorn & Gunicorn**: ASGI server implementation with workers management
 - **Docker & Docker Compose**: Containerization and orchestration
 - **SlowAPI**: Rate limiting implementation
+- **Kubernetes**: Configuration files for container orchestration
 
 ## Development Setup
 
@@ -171,9 +183,6 @@ The application is highly configurable through environment variables or a `.env`
 | WORKERS              | Number of Gunicorn workers               | 4             |
 | ENVIRONMENT          | Environment (development/production)     | development   |
 | LOG_LEVEL            | Logging level                            | INFO          |
-| LOG_FILE             | Log file path                            | app.log       |
-| LOG_MAX_SIZE         | Maximum log file size in bytes           | 10485760 (10MB)|
-| LOG_BACKUP_COUNT     | Number of log backups to keep            | 5             |
 | ALLOWED_ORIGINS      | CORS allowed origins (comma-separated)   | *             |
 | API_VERSION          | API version                              | v1            |
 | RATE_LIMIT_GENERAL   | General rate limit                       | 100/minute    |
@@ -264,50 +273,21 @@ Benchmark results will vary by hardware, but typical performance on modest hardw
 
 This project includes tools for Docker image vulnerability scanning:
 
-- Manual vulnerability scanning: `make docker-scan` or `./scan_docker_vulnerabilities.sh`
-- CI/CD integration: `./ci_vulnerability_scan.sh`
+- Manual vulnerability scanning: `make docker-scan` or `./docker_vulnerability_scanner.sh`
+- Connectivity diagnostics: `make docker-check` or `./docker_connectivity_check.sh`
 - Security reports are generated in various formats (JSON, HTML, text summary)
 
 For more details, see the [Docker Security Documentation](docs/docker_security.md).
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add some amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-Please make sure your code passes linting and tests:
-
-```bash
-# Format code
-make format
-
-# Run linting
-make lint
-
-# Run tests
-make test
-```
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-Made with ❤️ using FastAPI and modern Python practices 
-
-# Docker Vulnerability Scanning Tools
+## Docker Vulnerability Scanning Tools
 
 This repository contains tools for scanning Docker images for security vulnerabilities.
 
 ## Overview
 
-We've consolidated our Docker vulnerability scanning tools into a single, comprehensive scanner that provides flexibility, robust error handling, and enhanced reporting capabilities.
+We've consolidated our Docker vulnerability scanning tools into two main components:
+- A comprehensive scanner for vulnerability detection
+- A diagnostic tool for troubleshooting connectivity issues
 
 ## Key Components
 
@@ -403,3 +383,34 @@ These files are also included in .gitignore to prevent them from being committed
 - Improved Docker socket auto-detection
 - Enhanced error handling and diagnostics
 - Added comprehensive report generation 
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+Please make sure your code passes linting and tests:
+
+```bash
+# Format code
+make format
+
+# Run linting
+make lint
+
+# Run tests
+make test
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+Made with ❤️ using FastAPI and modern Python practices 
